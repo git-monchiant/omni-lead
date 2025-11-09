@@ -13,6 +13,27 @@ export interface Lead {
   nextFollowUpAt?: string;
 }
 
+export type MessageType = 'chat' | 'call';
+
+export interface Message {
+  id: string;
+  leadId: string;
+  type: MessageType;
+  sender: 'lead' | 'agent';
+  createdAt: string;
+  read?: boolean;
+
+  // For chat messages
+  message?: string;
+  platform?: 'line' | 'facebook' | 'web';
+
+  // For call messages
+  callDuration?: number; // in seconds
+  callStatus?: 'completed' | 'missed' | 'incoming' | 'outgoing';
+  callNotes?: string;
+}
+
+// Legacy interfaces (kept for backward compatibility)
 export interface ChatMessage {
   id: string;
   leadId: string;

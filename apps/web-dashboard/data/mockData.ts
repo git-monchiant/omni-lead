@@ -1,4 +1,4 @@
-import { Lead, ChatMessage, Call, User } from '../types';
+import { Lead, ChatMessage, Call, User, Message } from '../types';
 
 export const mockLeads: Lead[] = [
   {
@@ -64,11 +64,13 @@ export const mockLeads: Lead[] = [
   },
 ];
 
-export const mockChatMessages: Record<string, ChatMessage[]> = {
+// Unified messages - combining chat and call messages in timeline
+export const mockMessages: Record<string, Message[]> = {
   '1': [
     {
       id: 'msg1',
       leadId: '1',
+      type: 'chat',
       message: 'สวัสดีครับ สนใจคอนโดใกล้ BTS สุขุมวิท',
       sender: 'lead',
       platform: 'facebook',
@@ -78,6 +80,7 @@ export const mockChatMessages: Record<string, ChatMessage[]> = {
     {
       id: 'msg2',
       leadId: '1',
+      type: 'chat',
       message: 'สวัสดีครับคุณสมชาย ขอบคุณที่สนใจครับ ตอนนี้เรามีโครงการหลายแห่งใกล้ BTS สุขุมวิท งบประมาณประมาณเท่าไหร่ครับ',
       sender: 'agent',
       platform: 'facebook',
@@ -87,6 +90,7 @@ export const mockChatMessages: Record<string, ChatMessage[]> = {
     {
       id: 'msg3',
       leadId: '1',
+      type: 'chat',
       message: 'งบประมาณประมาณ 5 ล้านครับ ห้อง 1 ห้องนอน',
       sender: 'lead',
       platform: 'facebook',
@@ -96,17 +100,29 @@ export const mockChatMessages: Record<string, ChatMessage[]> = {
     {
       id: 'msg4',
       leadId: '1',
+      type: 'chat',
       message: 'เข้าใจครับ ผมจะส่งรายละเอียดโครงการที่เหมาะสมให้นะครับ พรุ่งนี้ว่างไหมครับ พาไปดูห้องตัวอย่าง',
       sender: 'agent',
       platform: 'facebook',
       createdAt: '2024-01-15T10:36:00Z',
       read: true,
     },
+    {
+      id: 'call1',
+      leadId: '1',
+      type: 'call',
+      sender: 'agent',
+      callDuration: 180,
+      callStatus: 'outgoing',
+      callNotes: 'โทรแนะนำโครงการ คุยเรื่องทำเล ลูกค้าสนใจ',
+      createdAt: '2024-01-15T14:20:00Z',
+    },
   ],
   '2': [
     {
       id: 'msg5',
       leadId: '2',
+      type: 'chat',
       message: 'สนใจบ้านเดี่ยวค่ะ',
       sender: 'lead',
       platform: 'line',
@@ -116,6 +132,7 @@ export const mockChatMessages: Record<string, ChatMessage[]> = {
     {
       id: 'msg6',
       leadId: '2',
+      type: 'chat',
       message: 'สวัสดีครับคุณสมหญิง ต้องการบ้านเดี่ยวย่านไหนครับ',
       sender: 'agent',
       platform: 'line',
@@ -125,17 +142,39 @@ export const mockChatMessages: Record<string, ChatMessage[]> = {
     {
       id: 'msg7',
       leadId: '2',
+      type: 'chat',
       message: 'ย่านรามอินทราค่ะ ใกล้โรงเรียน',
       sender: 'lead',
       platform: 'line',
       createdAt: '2024-01-14T09:25:00Z',
       read: true,
     },
+    {
+      id: 'call2',
+      leadId: '2',
+      type: 'call',
+      sender: 'agent',
+      callDuration: 0,
+      callStatus: 'missed',
+      callNotes: 'โทรไม่รับ ลองใหม่ตอนเย็น',
+      createdAt: '2024-01-14T14:30:00Z',
+    },
+    {
+      id: 'call3',
+      leadId: '2',
+      type: 'call',
+      sender: 'agent',
+      callDuration: 120,
+      callStatus: 'outgoing',
+      callNotes: 'โทรติดตามหลังแชท ลูกค้าขอเวลาคิด',
+      createdAt: '2024-01-15T11:00:00Z',
+    },
   ],
   '3': [
     {
       id: 'msg8',
       leadId: '3',
+      type: 'chat',
       message: 'ผมพร้อมจองแล้วครับ ขอดูห้องตัวอย่างได้ไหม',
       sender: 'lead',
       platform: 'web',
@@ -143,8 +182,19 @@ export const mockChatMessages: Record<string, ChatMessage[]> = {
       read: true,
     },
     {
+      id: 'call4',
+      leadId: '3',
+      type: 'call',
+      sender: 'agent',
+      callDuration: 300,
+      callStatus: 'outgoing',
+      callNotes: 'โทรนัดดูห้อง ลูกค้าพร้อมจอง ส่งเอกสารเบื้องต้น',
+      createdAt: '2024-01-15T16:31:00Z',
+    },
+    {
       id: 'msg9',
       leadId: '3',
+      type: 'chat',
       message: 'ได้เลยครับคุณวิชัย พรุ่งนี้เวลา 10.00 น. สะดวกไหมครับ',
       sender: 'agent',
       platform: 'web',
@@ -152,6 +202,13 @@ export const mockChatMessages: Record<string, ChatMessage[]> = {
       read: true,
     },
   ],
+};
+
+// Legacy data (for backward compatibility)
+export const mockChatMessages: Record<string, ChatMessage[]> = {
+  '1': mockMessages['1'].filter(m => m.type === 'chat') as ChatMessage[],
+  '2': mockMessages['2'].filter(m => m.type === 'chat') as ChatMessage[],
+  '3': mockMessages['3'].filter(m => m.type === 'chat') as ChatMessage[],
 };
 
 export const mockCalls: Record<string, Call[]> = {

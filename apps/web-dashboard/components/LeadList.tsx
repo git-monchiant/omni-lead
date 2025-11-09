@@ -1,5 +1,6 @@
 import React from 'react';
-import { Lead } from '../types';
+import { Lead, Message } from '../types';
+import { mockMessages } from '../data/mockData';
 
 interface LeadListProps {
   leads: Lead[];
@@ -46,6 +47,33 @@ export default function LeadList({ leads, selectedLead, onSelectLead }: LeadList
     return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
   };
 
+  const getLastMessage = (leadId: string): Message | null => {
+    const messages = mockMessages[leadId] || [];
+    return messages.length > 0 ? messages[messages.length - 1] : null;
+  };
+
+
+  const formatLastMessage = (message: Message | null): string => {
+    if (!message) return 'ยังไม่มีข้อความ';
+
+    if (message.type === 'chat') {
+      return message.message || '';
+    } else if (message.type === 'call') {
+      return `📞 ${message.callNotes || 'โทร'}`;
+    }
+    return '';
+  };
+
+  const formatDuration = (seconds?: number) => {
+    if (!seconds) return '';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    if (mins > 0) {
+      return `${mins}:${secs.toString().padStart(2, '0')} น.`;
+    }
+    return `${secs} วินาที`;
+  };
+
   return (
     <div className="lead-list">
       {leads.length === 0 ? (
@@ -53,39 +81,58 @@ export default function LeadList({ leads, selectedLead, onSelectLead }: LeadList
           <p>ไม่พบ Lead</p>
         </div>
       ) : (
-        leads.map((lead) => (
-          <div
-            key={lead.id}
-            className={`lead-item ${selectedLead?.id === lead.id ? 'selected' : ''}`}
-            onClick={() => onSelectLead(lead)}
-          >
-            <div className="lead-item-header">
-              <h3 className="lead-name">{lead.name}</h3>
-              <span
-                className="lead-status-badge"
-                style={{ backgroundColor: getStatusColor(lead.status) }}
-              >
-                {getStatusLabel(lead.status)}
-              </span>
+        leads.map((lead) => {
+          const lastMessage = getLastMessage(lead.id);
+
+          return (
+            <div
+              key={lead.id}
+              className={`lead-item ${selectedLead?.id === lead.id ? 'selected' : ''}`}
+              onClick={() => onSelectLead(lead)}
+            >
+              <div className="lead-item-header">
+                <h3 className="lead-name">{lead.name}</h3>
+                <span
+                  className="lead-status-badge"
+                  style={{ backgroundColor: getStatusColor(lead.status) }}
+                >
+                  {getStatusLabel(lead.status)}
+                </span>
+              </div>
+
+              <p className="lead-phone">{lead.phone}</p>
+
+              {lead.source && (
+                <span className="lead-source">📱 {lead.source}</span>
+              )}
+
+              {/* Last Activity */}
+              {lastMessage && (
+                <div className={`last-activity ${lastMessage.type === 'call' ? 'is-call' : ''}`}>
+                  <span className="activity-icon">
+                    {lastMessage.type === 'chat' ? '💬' : '📞'}
+                  </span>
+                  <div className="activity-content">
+                    <p className="activity-preview">
+                      {formatLastMessage(lastMessage)}
+                    </p>
+                    {lastMessage.type === 'call' && lastMessage.callDuration !== undefined && (
+                      <span className="activity-duration">
+                        {formatDuration(lastMessage.callDuration)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="lead-item-footer">
+                <span className="lead-time">
+                  {formatDate(lastMessage?.createdAt || lead.lastContactedAt || lead.createdAt)}
+                </span>
+              </div>
             </div>
-
-            <p className="lead-phone">{lead.phone}</p>
-
-            {lead.source && (
-              <span className="lead-source">📱 {lead.source}</span>
-            )}
-
-            {lead.notes && (
-              <p className="lead-notes">{lead.notes}</p>
-            )}
-
-            <div className="lead-item-footer">
-              <span className="lead-time">
-                {formatDate(lead.lastContactedAt || lead.createdAt)}
-              </span>
-            </div>
-          </div>
-        ))
+          );
+        })
       )}
 
       <style jsx>{`
@@ -170,6 +217,53 @@ export default function LeadList({ leads, selectedLead, onSelectLead }: LeadList
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
+        }
+
+        .last-activity {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.5rem;
+          margin: 0.75rem 0;
+          padding: 0.5rem;
+          background: #f9fafb;
+          border-radius: 6px;
+        }
+
+        .last-activity.is-call {
+          background: #fef3c7;
+        }
+
+        .activity-icon {
+          font-size: 1rem;
+          flex-shrink: 0;
+        }
+
+        .activity-content {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .activity-preview {
+          margin: 0;
+          font-size: 0.8125rem;
+          color: #4b5563;
+          line-height: 1.4;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .is-call .activity-preview {
+          color: #78350f;
+        }
+
+        .activity-duration {
+          display: inline-block;
+          margin-top: 0.25rem;
+          font-size: 0.75rem;
+          font-weight: 500;
+          color: #92400e;
         }
 
         .lead-item-footer {

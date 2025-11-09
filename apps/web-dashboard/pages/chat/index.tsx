@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Lead, FollowUpType } from '../../types';
+import { Lead } from '../../types';
 import LeadList from '../../components/LeadList';
 import ChatPanel from '../../components/ChatPanel';
-import CallLogPanel from '../../components/CallLogPanel';
 import LeadDetail from '../../components/LeadDetail';
 import { useSocket } from '../../hooks/useSocket';
 import { mockLeads } from '../../data/mockData';
 
 export default function LeadFollowupPage() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [activeTab, setActiveTab] = useState<FollowUpType>('chat');
   const [leads, setLeads] = useState<Lead[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -90,7 +88,7 @@ export default function LeadFollowupPage() {
         <main className="interaction-panel">
           {selectedLead ? (
             <>
-              {/* Lead Header with Tabs */}
+              {/* Lead Header */}
               <div className="interaction-header">
                 <div className="lead-info">
                   <h2>{selectedLead.name}</h2>
@@ -99,30 +97,11 @@ export default function LeadFollowupPage() {
                     {selectedLead.email && <span> • {selectedLead.email}</span>}
                   </p>
                 </div>
-
-                <div className="tab-navigation">
-                  <button
-                    className={`tab-button ${activeTab === 'chat' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('chat')}
-                  >
-                    💬 แชท
-                  </button>
-                  <button
-                    className={`tab-button ${activeTab === 'call' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('call')}
-                  >
-                    📞 โทร
-                  </button>
-                </div>
               </div>
 
-              {/* Content Area */}
+              {/* Unified Timeline - Chat & Call Messages */}
               <div className="interaction-content">
-                {activeTab === 'chat' ? (
-                  <ChatPanel lead={selectedLead} socket={socket} />
-                ) : (
-                  <CallLogPanel lead={selectedLead} />
-                )}
+                <ChatPanel lead={selectedLead} socket={socket} />
               </div>
             </>
           ) : (
